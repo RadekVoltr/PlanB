@@ -43,10 +43,15 @@
 
 #include  "DFPlayer_Mini_Mp3.hpp"
 
-PIO pio = pio0;
-uint sm = 0;
+#ifdef ARDUINO_ARCH_ESP32
+  HardwareSerial* DFSerial;
+#else
+  PIO pio = pio0;
+  uint sm = 0;
+#endif
     
-uint8_t send_buf[10] = {0x7E, 0xFF, 06, 00, 00, 00, 00, 00, 00, 0xEF};
+#define BUF_SIZE 10
+uint8_t send_buf[BUF_SIZE] = {0x7E, 0xFF, 06, 00, 00, 00, 00, 00, 00, 0xEF};
 
 unsigned long _last_call = 0;
 
@@ -82,23 +87,32 @@ void mp3_fill_checksum () {
 
 //
 void h_send_func () {
-  for (int i=0; i<10; i++) {
+  #ifdef ARDUINO_ARCH_ESP32
+    DFSerial->write(send_buf,BUF_SIZE);
+  #else
+  for (int i=0; i<BUF_SIZE; i++) {
     uart_tx_program_putc(pio, sm, send_buf[i]);
   }
+  #endif
 }
 
 //
+#ifdef ARDUINO_ARCH_ESP32
+  void mp3_set_serial(HardwareSerial Serial, uint SERIAL_BAUD)
+  {
+    DFSerial = &Serial;
+    DFSerial->begin(SERIAL_BAUD);
+  }
+#else
+  void mp3_set_serial (PIO pio_, uint sm_, uint PIN_TX, uint SERIAL_BAUD) {
+    pio = pio_;
+    sm = sm_;
 
-
-void mp3_set_serial (PIO pio_, uint sm_, uint PIN_TX, uint SERIAL_BAUD) {
-	pio = pio_;
-  sm = sm_;
-
-  PIO pio = pio0;
-  uint offset = pio_add_program(pio, &uart_tx_program);
-  uart_tx_program_init(pio, sm, offset, PIN_TX, SERIAL_BAUD);
-}
-
+    PIO pio = pio0;
+    uint offset = pio_add_program(pio, &uart_tx_program);
+    uart_tx_program_init(pio, sm, offset, PIN_TX, SERIAL_BAUD);
+  }
+#endif
 
 //
 void mp3_send_cmd_int (uint8_t cmd, uint16_t high_arg, uint16_t low_arg) {
@@ -142,7 +156,8 @@ void mp3_send_cmd_234 (uint8_t cmd, uint8_t byte1, uint32_t byte234) {
 
 
 // Receive replay
-uint8_t* mp3_recv_cmd () {
+/*
+uint8_t* mp3_recv () {
 	return mp3_recv_cmd(0);
 }
 
@@ -161,6 +176,7 @@ int mp3_recv_int_cmd (int wait) {
 int mp3_recv_int () {
 	return mp3_recv_int_cmd(0);
 }
+*/
 
 
 //
@@ -233,73 +249,80 @@ void mp3_get_state () {
 	mp3_send_cmd (0x42);
 }
 // Wait for mp3_get_state reply
+/*
 int mp3_wait_state () {
 	return mp3_recv_int_cmd(0x42);
 }
-
+*/
 //
 void mp3_get_volume () {
 	mp3_send_cmd (0x43);
 }
 // Wait for mp3_get_volume reply
+/*
 int mp3_wait_volume () {
 	return mp3_recv_int_cmd(0x43);
 }
-
+*/
 //
 void mp3_get_u_sum () {
 	mp3_send_cmd (0x47);
 }
 // Wait for mp3_get_u_sum reply
+/*
 int mp3_wait_u_sum () {
 	return mp3_recv_int_cmd(0x47);
 }
-
+*/
 //
 void mp3_get_tf_sum () {
 	mp3_send_cmd (0x48);
 }
 // Wait for mp3_get_tf_sum reply
+/*
 int mp3_wait_tf_sum () {
 	return mp3_recv_int_cmd(0x48);
 }
-
+*/
 //
 void mp3_get_flash_sum () {
 	mp3_send_cmd (0x49);
 }
 // Wait for mp3_get_flash_sum reply
+/*
 int mp3_wait_flash_sum () {
 	return mp3_recv_int_cmd(0x49);
 }
-
+*/
 //
 void mp3_get_tf_current () {
 	mp3_send_cmd (0x4c);
 }
 // Wait for mp3_get_tf_current reply
+/*
 int mp3_wait_tf_current () {
 	return mp3_recv_int_cmd(0x4c);
 }
-
+*/
 //
 void mp3_get_u_current () {
 	mp3_send_cmd (0x4b);
 }
 // Wait for mp3_get_u_current reply
+/*
 int mp3_wait_u_current() {
 	return mp3_recv_int_cmd(0x4b);
 }
-
+*/
 //
 void mp3_get_flash_current () {
 	mp3_send_cmd (0x4d);
 }
 // Wait for mp3_get_flash_current reply
-int mp3_wait_flash_current () {
+/*int mp3_wait_flash_current () {
 	return mp3_recv_int_cmd(0x4d);
 }
-
+*/
 //
 void mp3_single_loop (bool state) {
 	mp3_send_cmd_arg (0x19, !state);
@@ -307,7 +330,7 @@ void mp3_single_loop (bool state) {
 
 //add 
 void mp3_single_play (uint16_t num) {
-	mp3_play (num);
+	mp3_play_num (num);
 	delay (10);
 	mp3_single_loop (true); 
 	//mp3_send_cmd (0x19, !state);
@@ -328,10 +351,10 @@ void mp3_get_folder_sum (uint16_t folder) {
 	mp3_send_cmd_arg (0x4E, folder);
 }
 // Wait for mp3_get_folder_sum reply
-int mp3_wait_folder_sum () {
+/*int mp3_wait_folder_sum () {
 	return mp3_recv_int_cmd(0x4E);
 }
-
+*/
 // Play mp3 file in selected folder
 void mp3_play_file_in_folder (uint8_t folder, uint32_t num) {
 	mp3_send_cmd_int (0x14, folder, num);

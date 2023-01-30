@@ -1,6 +1,7 @@
 #ifndef SRC_SERVOS_HPP_
 #define SRC_SERVOS_HPP_
 
+
 /****************************************************************************************************************************
   RP2040_MultipleRandomServos.ino
   For :
@@ -62,49 +63,50 @@
 
 *****************************************************************************************************************************/
 
+#include <Arduino.h>
 #include "configuration.hpp"
+#include "communication.hpp"
 
 
-#if ( defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_RASPBERRY_PI_PICO) || defined(ARDUINO_ADAFRUIT_FEATHER_RP2040) || \
-      defined(ARDUINO_GENERIC_RP2040) ) && !defined(ARDUINO_ARCH_MBED)
-  #if !defined(RP2040_ISR_SERVO_USING_MBED)    
-    #define RP2040_ISR_SERVO_USING_MBED     false
-  #endif  
-  
-#elif ( defined(ARDUINO_NANO_RP2040_CONNECT) || defined(ARDUINO_RASPBERRY_PI_PICO) || defined(ARDUINO_ADAFRUIT_FEATHER_RP2040) || \
-      defined(ARDUINO_GENERIC_RP2040) ) && defined(ARDUINO_ARCH_MBED)
+#ifdef ARDUINO_ARCH_ESP32 
+
+
+#else
+
+    #if ( defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_RASPBERRY_PI_PICO) || defined(ARDUINO_ADAFRUIT_FEATHER_RP2040) || \
+          defined(ARDUINO_GENERIC_RP2040) ) && !defined(ARDUINO_ARCH_MBED)
+      #if !defined(RP2040_ISR_SERVO_USING_MBED)    
+        #define RP2040_ISR_SERVO_USING_MBED     false
+      #endif  
       
-  #if !defined(RP2040_ISR_SERVO_USING_MBED)    
-    #define RP2040_ISR_SERVO_USING_MBED     true
-  #endif  
-  
-#else      
-  #error This code is intended to run on the mbed / non-mbed RP2040 platform! Please check your Tools->Board setting.
+    #elif ( defined(ARDUINO_NANO_RP2040_CONNECT) || defined(ARDUINO_RASPBERRY_PI_PICO) || defined(ARDUINO_ADAFRUIT_FEATHER_RP2040) || \
+          defined(ARDUINO_GENERIC_RP2040) ) && defined(ARDUINO_ARCH_MBED)
+          
+      #if !defined(RP2040_ISR_SERVO_USING_MBED)    
+        #define RP2040_ISR_SERVO_USING_MBED     true
+      #endif  
+      
+    #else      
+      #error This code is intended to run on the mbed / non-mbed RP2040 platform! Please check your Tools->Board setting.
+    #endif
+
+    #define TIMER_INTERRUPT_DEBUG       2
+    #define ISR_SERVO_DEBUG             2
+
+    #include "RP2040_ISR_Servo.h"
 #endif
 
-#define TIMER_INTERRUPT_DEBUG       2
-#define ISR_SERVO_DEBUG             2
-
-#include "RP2040_ISR_Servo.h"
-
 // Published values for SG90 servos; adjust if needed
-#define MIN_MICROS        800
-#define MAX_MICROS        2450
-#define DEFAULT_MICROS    1500
+#define MIN_MICROS        (int16_t)800
+#define MAX_MICROS        (int16_t)2200
+#define DEFAULT_MICROS    (int16_t)1500
 
-typedef struct
-{
-  int     servoIndex;
-  uint8_t servoPin;
-  uint16_t position;
-} ISR_servo_t;
-
-extern ISR_servo_t Servos[SERVO_COUNT];
-
+void OffServos();
 void InitServos();
 void ProcessServos();
+void SetServoMicros(uint8_t index, uint16_t micros , bool Force = false);
 
-
+void ServoTest();
 
 
 

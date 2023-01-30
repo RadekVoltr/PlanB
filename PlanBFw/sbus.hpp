@@ -2,19 +2,21 @@
 #define SRC_SBUS_HPP_
 
 #include "configuration.hpp"
+#include "communication.hpp"
 
+#ifdef SBUS_PIN
 #include "sbus.h"
 #include "core_queue.hpp"
 
 //#define SBUS_DEBUG_WRITE
-#define SBUS_DEBUG_READ
+//#define SBUS_DEBUG_READ
+
+#define ANALOG_MIN 172 
+#define ANALOG_MAX 1811 
+
 
 #define SBUS_QUEUE_START 0xFFFFFFFF
 
-extern std::array<int16_t, bfs::SbusRx::NUM_CH() + 2> sbus_data;
-
-extern volatile bool sbus_failsafe;
-extern int sbus_channel_count;
 extern volatile bool sbus_lostframe;
 
 void InitSbus();
@@ -25,4 +27,4 @@ void ProcessSbusRead();
 
 
 #endif
-
+#endif

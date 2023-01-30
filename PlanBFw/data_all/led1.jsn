@@ -1,0 +1,33 @@
+{
+	"rpt":2,
+	"leds":
+	[
+		{"idx":0,
+		 "cnt":5,
+		 "mode":1,
+		 "tout":500,	
+		 "tmax":1500,	
+		 "init": { 
+				"r": 0,
+				"g": 0,
+				"b": 0
+				  }
+		 "anim":
+		 [
+			{
+			"trg":{ 
+				"r": 255,
+				"g": 255,
+				"b": 255
+				  },
+			"eas":9,
+			"time":2000,
+			"tmax":5000,	
+			}
+		 ]
+		}
+	]
+}
+
+
+//mode 0 => all on same color, 1=>rnd time from tout <> tmax same for all steps , 2> rnd time for each led , 3 > bar mode

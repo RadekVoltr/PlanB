@@ -1,5 +1,6 @@
 #include "tweens.hpp"
 #include "servos.hpp"
+#include "motors.hpp"
 
 
 
@@ -9,7 +10,4 @@ void ProcessServoTimeline()
 {
     //calculate next frame
     ServoTimeline.update();
-    //update servo pwm
-    ProcessServos();
-
 }

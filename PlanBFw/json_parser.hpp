@@ -7,15 +7,19 @@
 #include <array>
 #include <Arduino.h>
 #include <Tween.h>
-#include "LittleFS.h" // LittleFS is declared
 #include "commands.hpp"
 #include "tweens.hpp"
+#include "LittleFS.h"
 
 
 
 void InitCommandsFromFile(String s);
 void InitServosFromFile(String s);
 void LoadServoAnimationFromFile(String s);
+void InitTankMixesFromFile(String s);
+void InitMotorsFromFile(String s);
+
+
 
 
 #endif

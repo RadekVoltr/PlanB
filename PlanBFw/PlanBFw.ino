@@ -1,7 +1,12 @@
+#include <FS.h>
+#include "LittleFS.h"
+
 #include "configuration.hpp"
 #include "json_parser.hpp"
 #include "tweens.hpp"
 #include "commands.hpp"
+#include "tank.hpp"
+#include "motors.hpp"
 
 #ifdef SBUS_PIN
   #include "sbus.hpp"
@@ -11,27 +16,35 @@
   #include "servos.hpp"
 #endif
 
-#ifdef NEOPIXEL
+#ifdef NEOPIXEL_COUNT
   #include "neopixel.hpp"
 #endif
+
 
 // Core 0 resource setup,  calculations etc... happens here due timing and simplicity
 void setup() {
 
+  failsafe = true;
+
+  //OffServos();
+
+  pinMode(LED_BUILTIN , OUTPUT);
+  digitalWrite(LED_BUILTIN , LOW);
+
+
   Serial.begin(115200);
   
+  /*
   while(!Serial)
-    {};
+   {};
+  */
 
   Serial.println("init FS");
   
 
-  LittleFS.begin();
+  LittleFS.begin(true);
 
   // put your setup code here, to run once:
-  Serial.println("init commands");
-  InitCommandsFromFile("cmds.jsn");
-
   #ifdef SERVO_COUNT
   Serial.println("init servos");
   InitServos();
@@ -40,19 +53,25 @@ void setup() {
   InitServosFromFile("init.jsn");
   #endif
 
-  #ifdef NEOPIXEL
+  Serial.println("init commands");
+  InitCommandsFromFile("cmds.jsn");
+
+  Serial.println("init motors");
+  InitMotorsFromFile("motors.jsn");
+
+  Serial.println("init tank");
+  InitTankMixesFromFile("tank.jsn");
+
+  #ifdef NEOPIXEL_COUNT
   Serial.println("Neopixel init");
   InitNeoPixels();
   #endif
 
-  SetPixelStrip(0, 1, 0, 0, 255);
-  SetPixelStrip(0, 5, 255, 0, 0);
+  #ifdef MOTOR1_PWM_A
+  InitPWMMotors();
+  #endif
 
-  SetPixelStrip(1, 1, 255, 0, 255);
-  SetPixelStrip(1, 3, 0, 255, 255);
-
-  SetPixelStrip(2, 2, 255, 0, 0);
-  SetPixelStrip(2, 4, 0, 255, 0);
+  MultiCoreInit();
 
   Serial.println("setup done");
 }
@@ -60,9 +79,16 @@ void setup() {
 // Core 1 resource setup - will output SBUS and input Neopixel data for fastest/seamless result
 void setup1()
 {
+  failsafe = true;
+
   #ifdef SBUS_PIN
   Serial.println("SBUS init");
   InitSbus();
+  #endif
+
+  #ifdef XBOX_SX
+    Serial.println("XBOX Series X init");
+    InitXBoxSeriesSX();
   #endif
 
 
@@ -73,30 +99,61 @@ void setup1()
   
 }
 
+
+int cnt = 0;
+
 void loop() {
-  Serial.println("Core 0");
+
+  //ServoTest();
+  //return;
+
+  cnt++;
+
+  //Serial.print("Core 0"); Serial.println(cnt);
   // put your main code here, to run repeatedly:
   ProcessServoTimeline();
 
+  ProcessMotorsUpdate();
+  ProcessTanksUpdate();
+
+
+  //update servo pwm
+  ProcessServos();
+
+
+  #ifdef SBUS_PIN
   ProcessSbusRead();
+  #endif
 
-  if (sbus_failsafe)
+  /*if (failsafe)
     Serial.println("FAILSAFE!!!");
+    */
   
-  if (!sbus_failsafe)
-    ProcessCommands();
+  if (!failsafe)
+    {
+    //  ProcessCommands();
+    }
 
-  delay(100);
+  if (cnt >= 10)
+  {
+    //code with internal failsafe processing  
+    ProcessTanks();
+    ProcessMotors();
+    cnt = 0;
+  }
+
+  delay(10);
 
 }
 
 void loop1()
 {
-  Serial.println("Core 1");
+  //Serial.println("Core 1");
 
-  #ifdef SBUS_PIN
-    ProcessSbusWrite();
-  #endif
+  ProcessRemoteReceive();
+
+  //Serial.printf("XBOX : %d %d %d   ", failsafe, communication_data[0], communication_data[1]);
+
 
   ProcessNeoPixels(10); //neopixel processing with integrated delay, not need to call another delay in loop
 

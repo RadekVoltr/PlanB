@@ -1,11 +1,10 @@
 #include "sbus.hpp"
 
+#ifdef SBUS_PIN
+
 bfs::SbusRx sbus_rx(&SBUS_SERIAL);
 /* Array for storing SBUS data */
-std::array<int16_t, bfs::SbusRx::NUM_CH() + 2> sbus_data;
-volatile bool sbus_failsafe = true;
 volatile bool sbus_lostframe = true;
-int sbus_channel_count = 16;
 
 _CoreQueue SBUSQueue;
 
@@ -14,7 +13,6 @@ void InitSbus()
     SBUSQueue.begin(23);
     sbus_rx.Begin();
     gpio_set_inover(SBUS_PIN, GPIO_OVERRIDE_INVERT);
-    sbus_channel_count =  bfs::SbusRx::NUM_CH()+2;
 }
 
 bool ProcessSbusWrite()
@@ -102,3 +100,4 @@ void ProcessSbusRead()
   }
 }
 
+#endif

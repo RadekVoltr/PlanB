@@ -2,6 +2,7 @@
 #define SRC_COMMANDS_H_
 
 #include "configuration.hpp"
+#include "communication.hpp"
 
 #include <Arduino.h>
 
@@ -31,17 +32,17 @@ class CommandClass {
       FileName = "";
       Sound = "";
     };
-    bool Validate(int16_t * channels, bool OneTime) {
+    bool Validate(int16_t channels[], bool OneTime) {
       
       bool valid = false;
         if (Channel1 > 0)
           {
-            auto Ch1 = channels[Channel1-1];
+            int16_t Ch1 = channels[Channel1-1];
             valid = (Ch1 >= StartRange1 && Ch1 <= EndRange1);
           }
       if ((valid || Channel1==0) && Channel2 > 0)
           {
-            auto Ch2 = channels[Channel2-1];
+            int16_t Ch2 = channels[Channel2-1];
             valid = (Ch2 >= StartRange2 && Ch2 <= EndRange2);
           }
 

@@ -1,0 +1,12 @@
+[
+	{"channel":2,
+	 "type":"servo",
+	 "revert" : 0,
+	 "servo" : 0
+	},
+	{"channel":3,
+	 "type":"pwm",
+	 "revert" : 1,
+	 "id" : 1
+	}
+]

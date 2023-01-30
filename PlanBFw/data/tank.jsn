@@ -1,0 +1,28 @@
+[
+	{"channelA":1,
+	 "channelB":0,
+	 "type":"pwm",
+	 "revertA" : 1,
+	 "revertB" : 1,
+	 "pwmA" : 1,
+	 "pwmB" : 2,
+	 "downLimitA" : -50,
+	 "downLimitB" : -50,
+	 "topLimitB": 50,
+	 "topLimitB": 50
+	},
+	{"channelA":0,
+	 "channelB":1,
+	 "type":"servo",
+	 "revertA" : 0,
+	 "revertB" : 0,
+	 "servoA" : 1,
+	 "servoB" : 2,
+	 "topLimitA" : 1800,
+	 "downLimitA" : 1400,
+	 "trimA": 0,
+	 "topLimitB" : 1660,
+	 "downLimitB" : 1300,
+	 "trimB": -160
+	}
+]

@@ -1,0 +1,10 @@
+[
+	{"channelA":0,
+	 "channelB":1,
+	 "type":"servo",
+	 "revertA" : 0,
+	 "revertB" : 0,
+	 "motorA" : 0,
+	 "motorB" : 1
+	}
+]

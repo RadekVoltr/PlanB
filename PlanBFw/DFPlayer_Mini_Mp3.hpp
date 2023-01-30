@@ -45,8 +45,12 @@
  *	Description:			mp3 library for DFPlayer mini board
  *					note: mp3 file must put into mp3 folder in your tf card
  */
-#include "uart_txrx.pio.h"
-#include "hardware/pio.h"
+#ifdef ARDUINO_ARCH_ESP32
+
+#else
+  #include "uart_txrx.pio.h"
+  #include "hardware/pio.h"
+#endif
 #include <Arduino.h>
 
 // 7E FF 06 0F 00 01 01 xx xx EF
@@ -73,12 +77,16 @@ void mp3_fill_cmd (uint8_t cmd);
 //}
 
 //
+#ifdef ARDUINO_ARCH_ESP32
+void mp3_set_serial (HardwareSerial Serial, uint SERIAL_BAUD);
+#else
 void mp3_set_serial (PIO pio, uint sm, uint PIN_TX, uint SERIAL_BAUD);
+#endif
 
 //
 
 // Wait and receive replay for specific command
-uint8_t* mp3_recv_cmd_wait (uint8_t wait);
+//uint8_t* mp3_recv_cmd_wait (uint8_t wait);
 
 //
 uint16_t mp3_get_buf_checksum (uint8_t *thebuf);
