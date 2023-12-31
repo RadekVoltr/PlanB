@@ -22,11 +22,7 @@
   #include "neopixel.hpp"
 #endif
 
-// connect motor controller pins to Arduino digital pins
-// motor one
-int in1 = 14;
-int in2 = 15;
-int en1 = 13;
+unsigned long last_packet;
 
 int LED_PIN  = 25;
 bool init_done = false;
@@ -52,6 +48,7 @@ void seed_random_from_rosc()
 
 // Core 0 resource setup,  calculations etc... happens here due timing and simplicity
 void setup() {
+  last_packet = 0;
 
   pinMode(LED_PIN,OUTPUT);
   digitalWrite(LED_PIN, LOW);
@@ -151,44 +148,41 @@ void ProcessRCServo(uint8_t Channel, uint8_t Servo)
   spin_unlock_unsafe(sbus_spinlock) ;
   
 
-  if (value<172 || value>1811)
+  if (value<0 || value>2200)
     return;
 
-  if (ch15 > 1000)
-  {
-    //Serial.println("servo disabled");
-    pioServo.setServoMicros(0,Servo,0); //disable servo
-  }
-    else
-    {
-      int uM = map(value,172,1811,1000,2000);
-      pioServo.setServoMicros(0,Servo,uM);
-    }
+  int uM = map(value,172,1811,1000,2000);
+  
+  pioServo.setServoMicros(0,Servo,uM);
 }
 
 void loop() {
   //Serial.println("Core 0");
 
   if (sbus_failsafe)
-    Serial.println("FAILSAFE!!!");
+    {
+      if (last_packet + 100 < millis())
+        {
+          //failsafe reset of data
+          Serial.println("FAILSAFE");
+        }
+    }
+    else
+    last_packet = millis();
+
   
   if (!sbus_failsafe)
   {
     //Serial.print("SBUS:");Serial.print(sbus_data[15]);Serial.print(" - ");Serial.print(sbus_data[14]);Serial.print(" - ");Serial.print(sbus_data[8]);Serial.print(" - ");Serial.print(sbus_data[1]);Serial.print(" - ");Serial.print(sbus_data[2]);Serial.print(" - ");Serial.print(sbus_data[3]);Serial.print(" - ");Serial.print(sbus_data[0]);Serial.print(" ");Serial.print(sbus_data[4]);Serial.print(" ");Serial.println(sbus_data[5]);
 
-    //utility arms from RC originally
-    //ProcessRCServo(1, 9);
-    //ProcessRCServo(7, 10);
-
-    ProcessRCServo(8, 0);
+    ProcessRCServo(6, 7);
+    ProcessRCServo(7, 6);
+    ProcessRCServo(8, 5);
+    ProcessRCServo(4, 4);
+    ProcessRCServo(5, 3);
+    ProcessRCServo(9, 2);
     ProcessRCServo(10, 1);
-    ProcessRCServo(11, 2);
-    ProcessRCServo(9, 3);
-    ProcessRCServo(12, 4);
-    ProcessRCServo(13, 5);
-    ProcessRCServo(15, 6);
-    //ProcessRCServo(15, 14);
-    //ProcessRCServo(16, 8);
+    ProcessRCServo(11, 0);
 
   }
 

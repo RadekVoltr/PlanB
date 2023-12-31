@@ -7,6 +7,8 @@ volatile bool sbus_failsafe = true;
 volatile bool sbus_lostframe = true;
 spin_lock_t *sbus_spinlock;
 
+unsigned long sbus_last_packet;
+
 //#define SBUS_DEBUG_WRITE
 
 void InitSbus()
@@ -37,7 +39,7 @@ bool ProcessSbusWrite()
       }
 
     for (int8_t i = 0; i < data.NUM_CH; i++)
-    if (data.ch[i]<172 || data.ch[i]>1811)
+    if (data.ch[i]<0 || data.ch[i]>2047)
             {
               Serial.println("SBUS packet invalid");
               return false;
@@ -52,6 +54,7 @@ bool ProcessSbusWrite()
     sbus_data[data.NUM_CH + 2] = data.ch18;
 
     spin_unlock_unsafe(sbus_spinlock) ;
+    sbus_last_packet = millis();
 
 
     #ifdef SBUS_DEBUG_WRITE
@@ -68,7 +71,8 @@ bool ProcessSbusWrite()
     #endif
     }
     else
-      sbus_failsafe = true;
+      if (sbus_last_packet+100<millis())
+          sbus_failsafe = true;
 
   return res;
 }

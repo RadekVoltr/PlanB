@@ -8,11 +8,11 @@
 #define NEOPIXEL_PIN 16
 #define NEOPIXEL_LED_COUNT 80
 
-/*
-#define NEOPIXEL1_PIN 17
+
+/*#define NEOPIXEL1_PIN 22
 #define NEOPIXEL1_LED_COUNT 30
 
-#define NEOPIXEL2 19
+/*#define NEOPIXEL2 19
 #define NEOPIXEL2_LED_COUNT 7
 
 #define I2C_SDA  16
@@ -23,7 +23,7 @@
 #define SBUS_PIN 1
 
 #define SERVOS_PIO  pio1
-#define SERVO_SET_1_PIN 7
+#define SERVO_SET_1_PIN 8
 #define SERVO_SET_1_COUNT 8
 //#define SERVO_SET_2_PIN 15
 //#define SERVO_SET_2_COUNT 6
